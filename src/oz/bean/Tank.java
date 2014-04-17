@@ -2,6 +2,7 @@ package oz.bean;
 
 import java.awt.Point;
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import oz.type.DirKey;
 
@@ -63,24 +64,55 @@ public class Tank implements Serializable{
 
 
 
-	public void active(DirKey key,int speed){
-		
+	public void active(DirKey key,int speed,int screenWidth,int screenHeight){
+		final int OFFSET = 25;
 		if( key!=DirKey.Else ){
 			//保存坦克方向,画图时用
 			lastDir = key;
 		}
 		
 		if( key==DirKey.Up ){
-			this.y = this.y - speed;
+			if( this.y>OFFSET ){
+				this.y = this.y - speed;
+			}
+			
 		}
 		else if( key==DirKey.Down ){
-			this.y = this.y + speed;
+			if( this.y<screenHeight-HEIGHT ){
+				this.y = this.y + speed;
+			}
 		}
 		else if( key==DirKey.Left ){
-			this.x = this.x - speed;
+			if( this.x>0 ){
+				this.x = this.x - speed;
+			}
 		}
 		else if( key==DirKey.Right ){
-			this.x = this.x + speed;
+			if( this.x<screenWidth-WIDTH ){
+				this.x = this.x + speed;
+			}
+		}
+	}
+	
+	
+	private Point getCenter(){
+		return new Point(x+WIDTH/2, y+HEIGHT/2);
+	}
+	
+	
+	
+	public void hit(ArrayList<Bullet> bullets){
+		for(Bullet b:bullets){
+			//子弹活着的时候才有杀伤力
+			if( b.isAlive() ){
+				if(b.getX()>x && b.getX()<x+WIDTH && b.getY()>y && b.getY()<y+HEIGHT ){
+					//暂时设置成 碰到子弹就死亡
+					b.setAlive(false);
+					this.setAlive(false);
+					break;
+				}
+			}
+			
 		}
 	}
 	

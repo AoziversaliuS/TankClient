@@ -28,6 +28,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	
 	public static final int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 600;
 	public static final int SERVER_PORT = 9090;
+	private boolean firstTime=true;
 	
 	private static String ip="127.0.0.1";
 	
@@ -127,7 +128,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	public void logic(){
 		
 		
-		tank.active(selectKey, speed);
+		tank.active(selectKey, speed,SCREEN_WIDTH,SCREEN_HEIGHT);
 		
 		//保存要发给服务器的信息
 		tank.setClientMessage(message);
@@ -308,6 +309,25 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		}
 		gBuffer.setColor(Color.yellow);
 		gBuffer.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		if(firstTime){
+			//去除闪烁
+			gBuffer.drawImage(EnemyTank_Down, 2000, 2000, null);
+			gBuffer.drawImage(EnemyTank_Left, 2000, 2000, null);
+			gBuffer.drawImage(EnemyTank_Right, 2000, 2000, null);
+			gBuffer.drawImage(EnemyTank_Up, 2000, 2000, null);
+			
+			gBuffer.drawImage(MyTank_Down, 2000, 2000, null);
+			gBuffer.drawImage(MyTank_Left, 2000, 2000, null);
+			gBuffer.drawImage(MyTank_Right, 2000, 2000, null);
+			gBuffer.drawImage(MyTank_Up, 2000, 2000, null);
+			
+			gBuffer.drawImage(OzTank_Down, 2000, 2000, null);
+			gBuffer.drawImage(OzTank_Left, 2000, 2000, null);
+			gBuffer.drawImage(OzTank_Right, 2000, 2000, null);
+			gBuffer.drawImage(OzTank_Up, 2000, 2000, null);
+			
+			firstTime = false;
+		}
 	}
 	
 	
