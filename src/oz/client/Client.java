@@ -19,15 +19,28 @@ import javax.swing.JFrame;
 import oz.bean.Tank;
 
 public class Client extends JFrame implements Runnable{
-	public static final int SERVER_PORT = 9090;
-	public static final int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 600;
 	private static Toolkit tool = Toolkit.getDefaultToolkit();
+	
+	public static final int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 600;
+	public static final int SERVER_PORT = 9090;
+	
+	private static String ip="127.0.0.1";
+	
+	private Socket socket;
+	private ObjectInputStream ois;
+	private ObjectOutputStream oos;
+	private int id;
+	
 	Image MyTank;
 	Image EnemyTank;
 	Image OzTank;
 	
 	Image imageBuffer;
 	Graphics gBuffer;
+	
+	Tank tank;
+	ArrayList<Tank> tanks;
+	
 	public Client(){
 		
 		MyTank = getImage("MyTank.png");
@@ -41,12 +54,56 @@ public class Client extends JFrame implements Runnable{
 		this.setTitle("奥茨多人坦克大战客户端");
 		this.setVisible(true);
 		
+		try {
+			socket = new Socket(ip, SERVER_PORT);
+			ois = new ObjectInputStream(socket.getInputStream());
+			oos = new ObjectOutputStream(socket.getOutputStream());
+			id = Integer.parseInt((String)ois.readObject());
+			System.out.println("从服务器收到id="+id);
+			//坦克初始化
+			tank = new Tank(id, "坦克["+id+"]", randomPoint());
+			
+			System.out.println(tank);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (NumberFormatException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 	}
 	
 	public void logic(){
-		
+		try {
+//			System.out.println(tank);
+			oos.reset();
+			oos.writeObject(tank);
+			oos.flush();
+			tanks = (ArrayList<Tank>) ois.readObject();
+			System.out.println(tanks);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
 	}
 	public void draw(){
+		if( tanks!=null ){
+			for(Tank tank:tanks){
+				if( tank.getId()==id ){
+					gBuffer.drawImage(MyTank, tank.getL().x, tank.getL().y, null);
+				}
+				else{
+					gBuffer.drawImage(EnemyTank, tank.getL().x, tank.getL().y, null);
+				}
+				
+				
+			}
+		}
 		
 	}
 
@@ -112,17 +169,23 @@ public class Client extends JFrame implements Runnable{
 	private static Image getImage(String imagePath){
 		return tool.getImage(Client.class.getClassLoader().getResource("Image/"+imagePath));
 	}
+	private static Point randomPoint(){
+		Point p= new Point();
+		int x = (int) (Math.random()*SCREEN_WIDTH);
+		int y = (int) (Math.random()*SCREEN_HEIGHT);
+		p.setLocation(x, y);
+		return p;
+	}
 	
 	
 	
 	
 	public static void main(String[] args) {
 		
-		Toolkit tool = Toolkit.getDefaultToolkit();
-//		tool.get
-//		 Image i = tool.getImage("/Image/MyTank.png");
 		Client c =new Client();
+		
 		Thread th = new Thread(c);
+		
 		th.start();
 	}
 	
