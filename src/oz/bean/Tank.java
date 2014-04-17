@@ -3,6 +3,8 @@ package oz.bean;
 import java.awt.Point;
 import java.io.Serializable;
 
+import oz.type.DirKey;
+
 public class Tank implements Serializable{
 	
 	public static final int  WIDTH = 40;
@@ -57,6 +59,35 @@ public class Tank implements Serializable{
 	}
 
 
+	
+	
+	
+	public void active(DirKey key,int speed){
+		
+		if( key==DirKey.Up ){
+			this.y = this.y - speed;
+		}
+		else if( key==DirKey.Down ){
+			this.y = this.y + speed;
+		}
+		else if( key==DirKey.Left ){
+			this.x = this.x - speed;
+		}
+		else if( key==DirKey.Right ){
+			this.x = this.x + speed;
+		}
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 	public int getClientMessage() {
 		return clientMessage;
 	}

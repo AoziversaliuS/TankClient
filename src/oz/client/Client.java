@@ -6,6 +6,8 @@ import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,8 +19,9 @@ import java.util.ArrayList;
 import javax.swing.JFrame;
 
 import oz.bean.Tank;
+import oz.type.DirKey;
 
-public class Client extends JFrame implements Runnable{
+public class Client extends JFrame implements Runnable,KeyListener{
 	private static Toolkit tool = Toolkit.getDefaultToolkit();
 	
 	public static final int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 600;
@@ -41,6 +44,10 @@ public class Client extends JFrame implements Runnable{
 	Tank tank;
 	ArrayList<Tank> tanks;
 	
+	private DirKey selectKey = DirKey.Else;
+	private final int speed = 2;
+	private boolean fire = false;
+	
 	public Client(){
 		
 		MyTank = getImage("MyTank.png");
@@ -51,7 +58,8 @@ public class Client extends JFrame implements Runnable{
 		Dimension scrSize=Toolkit.getDefaultToolkit().getScreenSize(); 
 		this.setLocation(scrSize.width/2-SCREEN_WIDTH/2, scrSize.height/2-SCREEN_HEIGHT/2);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setTitle("奥茨多人坦克大战客户端");
+		this.addKeyListener(this);
+		this.setResizable(false);
 		this.setVisible(true);
 		
 		try {
@@ -60,6 +68,7 @@ public class Client extends JFrame implements Runnable{
 			oos = new ObjectOutputStream(socket.getOutputStream());
 			id = Integer.parseInt((String)ois.readObject());
 			System.out.println("从服务器收到id="+id);
+			this.setTitle("[奥茨]多人坦克大战客户端 ["+id+"]");
 			//坦克初始化
 //			tank = new Tank(id, "坦克["+id+"]", randomPoint());
 			tank = new Tank(randomPoint(), id, "坦克["+id+"]");
@@ -77,22 +86,27 @@ public class Client extends JFrame implements Runnable{
 		
 	}
 	
+	
+	
+	
 	public void logic(){
+		
+		
+		tank.active(selectKey, speed);
+		
+		
+		
+		
+		
+		
 		try {
-//			System.out.println(tank);
-			if(tank.getX()<SCREEN_WIDTH){
-				tank.setX(tank.getX()+2);
-			}
-			else{
-				tank.setX(0);
-			}
-			
+			//发送自己的坦克信息给服务器
 			oos.reset();
 			oos.writeObject(tank);
 			oos.flush();
-			
+			//获取服务器数据
 			tanks = (ArrayList<Tank>) ois.readObject();
-			System.out.println(tanks);
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		} catch (ClassNotFoundException e) {
@@ -120,28 +134,63 @@ public class Client extends JFrame implements Runnable{
 
 
 
-	@Override
-	public void paint(Graphics g) {
-		
-		
-		bufferReset();
+	
 
-		draw();
+	
+	@Override
+	public void keyTyped(KeyEvent e) {
 		
-		g.drawImage(imageBuffer, 0, 0, null);
 	}
-	
-	private void bufferReset(){
-		if( imageBuffer==null ){
-			imageBuffer = this.createImage(SCREEN_WIDTH, SCREEN_HEIGHT);
-			gBuffer = imageBuffer.getGraphics();
-			System.out.println("初始化");
+
+	@Override
+	public void keyPressed(KeyEvent e) {
+		
+		if( e.getKeyCode()==KeyEvent.VK_UP ){
+			selectKey = DirKey.Up;
 		}
-		gBuffer.setColor(Color.yellow);
-		gBuffer.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		else if( e.getKeyCode()==KeyEvent.VK_LEFT ){
+			selectKey = DirKey.Left;
+		}
+		else if( e.getKeyCode()==KeyEvent.VK_RIGHT ){
+			selectKey = DirKey.Right;
+		}
+		else if( e.getKeyCode()==KeyEvent.VK_DOWN ){
+			selectKey = DirKey.Down;
+		}
 	}
-	
-	
+
+	@Override
+	public void keyReleased(KeyEvent e) {
+		
+		if( e.getKeyCode()==KeyEvent.VK_UP ){
+			if( selectKey==DirKey.Up ){
+				selectKey = DirKey.Else;
+			}
+			System.out.println(selectKey);
+		}
+		else if( e.getKeyCode()==KeyEvent.VK_LEFT ){
+			if( selectKey==DirKey.Left ){
+				selectKey = DirKey.Else;
+			}
+			System.out.println(selectKey);
+		}
+		else if( e.getKeyCode()==KeyEvent.VK_RIGHT ){
+			if( selectKey==DirKey.Right ){
+				selectKey = DirKey.Else;
+			}
+			System.out.println(selectKey);
+		}
+		else if( e.getKeyCode()==KeyEvent.VK_DOWN ){
+			if( selectKey==DirKey.Down ){
+				selectKey = DirKey.Else;
+			}
+			System.out.println(selectKey);
+		}
+		else if( e.getKeyCode()==KeyEvent.VK_SPACE ){
+			fire = true;
+		}
+		
+	}
 	
 	
 
@@ -156,11 +205,25 @@ public class Client extends JFrame implements Runnable{
 			
 			logic();
 			repaint();
-			
+//			System.out.println("select: "+selectKey);
 		}
 		
 	}
-	
+	@Override
+	public void paint(Graphics g) {
+		bufferReset();
+		draw();
+		g.drawImage(imageBuffer, 0, 0, null);
+	}
+	private void bufferReset(){
+		if( imageBuffer==null ){
+			imageBuffer = this.createImage(SCREEN_WIDTH, SCREEN_HEIGHT);
+			gBuffer = imageBuffer.getGraphics();
+			System.out.println("初始化");
+		}
+		gBuffer.setColor(Color.yellow);
+		gBuffer.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+	}
 	
 	
 	
@@ -192,6 +255,8 @@ public class Client extends JFrame implements Runnable{
 		
 		th.start();
 	}
+
+
 	
 
 
