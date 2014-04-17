@@ -8,7 +8,7 @@ import oz.type.DirKey;
 public class Tank implements Serializable{
 	
 	public static final int  WIDTH = 40;
-	public static final int HEIGHT = 50;
+	public static final int HEIGHT = 40;
 	
 	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2;
 	private int clientMessage = Tank.M_DEGFAULT;
