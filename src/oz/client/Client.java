@@ -34,9 +34,21 @@ public class Client extends JFrame implements Runnable,KeyListener{
 	private ObjectOutputStream oos;
 	private int id;
 	
-	Image MyTank;
-	Image EnemyTank;
-	Image OzTank;
+	//MyTank
+	Image MyTank_Left;
+	Image MyTank_Right;
+	Image MyTank_Up;
+	Image MyTank_Down;
+	//EnemyTank
+	Image EnemyTank_Left;
+	Image EnemyTank_Right;
+	Image EnemyTank_Up;
+	Image EnemyTank_Down;
+	//OzTank
+	Image OzTank_Left;
+	Image OzTank_Right;
+	Image OzTank_Up;
+	Image OzTank_Down;
 	
 	Image imageBuffer;
 	Graphics gBuffer;
@@ -50,9 +62,7 @@ public class Client extends JFrame implements Runnable,KeyListener{
 	
 	public Client(){
 		
-		MyTank = getImage("MyTank.png");
-		EnemyTank = getImage("EnemyTank.png");
-		OzTank = getImage("OzTank.png");
+		imageInit();
 		
 		this.setSize(SCREEN_WIDTH, SCREEN_HEIGHT);
 		Dimension scrSize=Toolkit.getDefaultToolkit().getScreenSize(); 
@@ -68,7 +78,7 @@ public class Client extends JFrame implements Runnable,KeyListener{
 			oos = new ObjectOutputStream(socket.getOutputStream());
 			id = Integer.parseInt((String)ois.readObject());
 			System.out.println("从服务器收到id="+id);
-			this.setTitle("[奥茨]多人坦克大战客户端 ["+id+"]");
+			this.setTitle("[奥茨制作]多人坦克大战客户端 ["+id+"]");
 			//坦克初始化
 //			tank = new Tank(id, "坦克["+id+"]", randomPoint());
 			tank = new Tank(randomPoint(), id, "坦克["+id+"]");
@@ -86,6 +96,24 @@ public class Client extends JFrame implements Runnable,KeyListener{
 		
 	}
 	
+	
+	private void imageInit(){
+		//MyTank
+		MyTank_Left  = getImage("MyTank_Left.png");
+		MyTank_Right = getImage("MyTank_Right.png");
+		MyTank_Up    = getImage("MyTank_Up.png");
+		MyTank_Down  = getImage("MyTank_Down.png");
+		//EnemyTank
+		EnemyTank_Left  = getImage("EnemyTank_Left.png");
+		EnemyTank_Right = getImage("EnemyTank_Right.png");
+		EnemyTank_Up    = getImage("EnemyTank_Up.png");
+		EnemyTank_Down  = getImage("EnemyTank_Down.png");
+		//OzTank 
+		OzTank_Left  = getImage("OzTank_Left.png");
+		OzTank_Right = getImage("OzTank_Right.png");
+		OzTank_Up    = getImage("OzTank_Up.png"); 
+		OzTank_Down  = getImage("OzTank_Down.png");
+	}
 	
 	
 	
@@ -118,10 +146,34 @@ public class Client extends JFrame implements Runnable,KeyListener{
 		if( tanks!=null ){
 			for(Tank tank:tanks){
 				if( tank.getId()==id ){
-					gBuffer.drawImage(MyTank, tank.getX(), tank.getY(), null);
+					//根据方向来画对应的图片  玩家
+					if( tank.getLastDir()==DirKey.Up ){
+						gBuffer.drawImage(MyTank_Up, tank.getX(), tank.getY(), null);
+					}
+					else if( tank.getLastDir()==DirKey.Left ){
+						gBuffer.drawImage(MyTank_Left, tank.getX(), tank.getY(), null);
+					}
+					else if( tank.getLastDir()==DirKey.Right ){
+						gBuffer.drawImage(MyTank_Right, tank.getX(), tank.getY(), null);
+					}
+					else if( tank.getLastDir()==DirKey.Down ){
+						gBuffer.drawImage(MyTank_Down, tank.getX(), tank.getY(), null);
+					}
 				}
 				else{
-					gBuffer.drawImage(EnemyTank, tank.getX(), tank.getY(), null);
+					//根据方向来画对应的图片 敌人
+					if( tank.getLastDir()==DirKey.Up ){
+						gBuffer.drawImage(EnemyTank_Up, tank.getX(), tank.getY(), null);
+					}
+					else if( tank.getLastDir()==DirKey.Left ){
+						gBuffer.drawImage(EnemyTank_Left, tank.getX(), tank.getY(), null);
+					}
+					else if( tank.getLastDir()==DirKey.Right ){
+						gBuffer.drawImage(EnemyTank_Right, tank.getX(), tank.getY(), null);
+					}
+					else if( tank.getLastDir()==DirKey.Down ){
+						gBuffer.drawImage(EnemyTank_Down, tank.getX(), tank.getY(), null);
+					}
 				}
 				
 				
