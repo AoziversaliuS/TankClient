@@ -61,8 +61,8 @@ public class Client extends JFrame implements Runnable{
 			id = Integer.parseInt((String)ois.readObject());
 			System.out.println("从服务器收到id="+id);
 			//坦克初始化
-			tank = new Tank(id, "坦克["+id+"]", randomPoint());
-			
+//			tank = new Tank(id, "坦克["+id+"]", randomPoint());
+			tank = new Tank(randomPoint(), id, "坦克["+id+"]");
 			System.out.println(tank);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -80,9 +80,17 @@ public class Client extends JFrame implements Runnable{
 	public void logic(){
 		try {
 //			System.out.println(tank);
+			if(tank.getX()<SCREEN_WIDTH){
+				tank.setX(tank.getX()+2);
+			}
+			else{
+				tank.setX(0);
+			}
+			
 			oos.reset();
 			oos.writeObject(tank);
 			oos.flush();
+			
 			tanks = (ArrayList<Tank>) ois.readObject();
 			System.out.println(tanks);
 		} catch (IOException e) {
@@ -92,13 +100,14 @@ public class Client extends JFrame implements Runnable{
 		}
 	}
 	public void draw(){
+		
 		if( tanks!=null ){
 			for(Tank tank:tanks){
 				if( tank.getId()==id ){
-					gBuffer.drawImage(MyTank, tank.getL().x, tank.getL().y, null);
+					gBuffer.drawImage(MyTank, tank.getX(), tank.getY(), null);
 				}
 				else{
-					gBuffer.drawImage(EnemyTank, tank.getL().x, tank.getL().y, null);
+					gBuffer.drawImage(EnemyTank, tank.getX(), tank.getY(), null);
 				}
 				
 				
@@ -148,11 +157,6 @@ public class Client extends JFrame implements Runnable{
 			logic();
 			repaint();
 			
-//			try {
-//				Thread.sleep(15);
-//			} catch (InterruptedException e) {
-//				e.printStackTrace();
-//			}
 		}
 		
 	}
@@ -171,8 +175,8 @@ public class Client extends JFrame implements Runnable{
 	}
 	private static Point randomPoint(){
 		Point p= new Point();
-		int x = (int) (Math.random()*SCREEN_WIDTH);
-		int y = (int) (Math.random()*SCREEN_HEIGHT);
+		int x = (int) (Math.random()*(SCREEN_WIDTH-Tank.WIDTH));
+		int y = (int) (Math.random()*(SCREEN_HEIGHT-Tank.HEIGHT));
 		p.setLocation(x, y);
 		return p;
 	}

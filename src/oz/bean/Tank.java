@@ -5,46 +5,138 @@ import java.io.Serializable;
 
 public class Tank implements Serializable{
 	
-	private int    id;
-	private String name;
-	private Point  l;
+	public static final int  WIDTH = 40;
+	public static final int HEIGHT = 50;
+	
+	public static final int M_DEGFAULT=0,M_EXIT=1;
+	private int clientMessage = Tank.M_DEGFAULT;
+	
+	private int x;
+	private int y;
+
+	
+
+	
+	private int     id;
+	private String  name;
+	private boolean alive;
+	private int     hp;
 	
 	
 	
+	
+	public Tank(Point p, int id,String name) {
+
+		this.x = p.x;
+		this.y = p.y;
+		this.id = id;
+		this.name = name;
+
+		this.clientMessage = Tank.M_DEGFAULT;
+		this.alive = true;
+		this.hp = 100;
+	}
 	
 	
 	public Tank() {
 	}
-	public Tank(int id, String name, Point l) {
+
+	
+	
+	
+	public Tank(int clientMessage, int x, int y, int id, String name,
+			boolean alive, int hp) {
 		super();
+		this.clientMessage = clientMessage;
+		this.x = x;
+		this.y = y;
 		this.id = id;
 		this.name = name;
-		this.l = l;
+		this.alive = alive;
+		this.hp = hp;
 	}
+
+
+	public int getClientMessage() {
+		return clientMessage;
+	}
+
+
+	public void setClientMessage(int clientMessage) {
+		this.clientMessage = clientMessage;
+	}
+
+
+	public int getX() {
+		return x;
+	}
+
+
+	public void setX(int x) {
+		this.x = x;
+	}
+
+
+	public int getY() {
+		return y;
+	}
+
+
+	public void setY(int y) {
+		this.y = y;
+	}
+
+
 	public int getId() {
 		return id;
 	}
+
+
 	public void setId(int id) {
 		this.id = id;
 	}
+
+
 	public String getName() {
 		return name;
 	}
+
+
 	public void setName(String name) {
 		this.name = name;
 	}
-	public Point getL() {
-		return l;
+
+
+	public boolean isAlive() {
+		return alive;
 	}
-	public void setL(Point l) {
-		this.l = l;
+
+
+	public void setAlive(boolean alive) {
+		this.alive = alive;
 	}
-	
-	
+
+
+	public int getHp() {
+		return hp;
+	}
+
+
+	public void setHp(int hp) {
+		this.hp = hp;
+	}
+
+
 	@Override
 	public String toString() {
-		return "Tank [id=" + id + ", name=" + name + ", l=" + l + "]";
+		return "Tank [clientMessage=" + clientMessage + ", x=" + x + ", y=" + y
+				+ ", id=" + id + ", name=" + name + ", alive=" + alive
+				+ ", hp=" + hp + "]";
 	}
+
+
+	
+	
 	
 	
 
