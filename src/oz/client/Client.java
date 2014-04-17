@@ -57,7 +57,7 @@ public class Client extends JFrame implements Runnable,KeyListener{
 	ArrayList<Tank> tanks;
 	
 	private DirKey selectKey = DirKey.Else;
-	private final int speed = 2;
+	private final int speed = 4;
 	private boolean fire = false;
 	
 	public Client(){
