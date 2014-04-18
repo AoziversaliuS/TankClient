@@ -44,7 +44,7 @@ public class Tank implements Serializable{
 
 		this.clientMessage = Tank.M_DEGFAULT;
 		this.alive = true;
-		this.hp = 100;
+		this.hp = 40;
 		this.lastDir = DirKey.Up;
 	}
 	
@@ -71,10 +71,10 @@ public class Tank implements Serializable{
 	public void fire(){
 		final int dX = 3,dY = 3;
 		if( lastDir==DirKey.Up || lastDir==DirKey.Down ){
-			bullets.add(new Bullet(this.getCenter().x - dX, this.getCenter().y, lastDir));
+			bullets.add(new Bullet(id,this.getCenter().x - dX, this.getCenter().y, lastDir));
 		}
 		else{
-			bullets.add(new Bullet(this.getCenter().x, this.getCenter().y - dY, lastDir));
+			bullets.add(new Bullet(id,this.getCenter().x, this.getCenter().y - dY, lastDir));
 		}
 			
 	}
@@ -121,7 +121,7 @@ public class Tank implements Serializable{
 	public boolean hit(ArrayList<Bullet> bullets){
 		for(Bullet b:bullets){
 			//子弹活着的时候才有杀伤力
-			if( b.isAlive() ){
+			if( b.isAlive() && b.getId()!=id ){
 				if(b.getX()>x && b.getX()<x+WIDTH && b.getY()>y && b.getY()<y+HEIGHT ){
 					//暂时设置成 碰到子弹就死亡
 					this.setAlive(false);
@@ -134,7 +134,7 @@ public class Tank implements Serializable{
 	}
 	
 	public boolean hit(Bullet b){
-		if( b.isAlive() ){
+		if( b.isAlive() && b.getId()!=id ){
 			if(b.getX()>x && b.getX()<x+WIDTH && b.getY()>y && b.getY()<y+HEIGHT ){
 				//暂时设置成 碰到子弹就死亡
 				this.setAlive(false);

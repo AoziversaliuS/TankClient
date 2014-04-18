@@ -182,10 +182,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 
 		//检测自己有无被子弹打中
 		for(Tank tank:tanks){
-			if( tank.getId()!=id ){
 				clientTank.hit(tank.getBullets());
-			}
-			
 		}
 		
 		//检测自己的子弹有无打中其它玩家
