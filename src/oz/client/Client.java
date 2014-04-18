@@ -2,6 +2,7 @@ package oz.client;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
@@ -19,6 +20,7 @@ import java.net.UnknownHostException;
 import java.util.ArrayList;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import oz.bean.Bullet;
 import oz.bean.Tank;
@@ -39,6 +41,8 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	private int id;
 	private int message = Tank.M_DEGFAULT;
 	
+	//BackGround
+	Image BackGround;
 	//MyTank
 	Image MyTank_Left;
 	Image MyTank_Right;
@@ -69,10 +73,12 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	
 	private final int tankSpeed = 4;
 	private final int bulletSpeed = 6;
+	private final int bulletDamage = 3;
 	
 	private boolean fire = false;
 	
-	public Client(){
+	public Client(String ip,String playerName){
+		Client.ip = ip;
 		
 		imageInit();
 		
@@ -96,17 +102,29 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			this.setTitle("[奥茨制作]多人坦克大战客户端 ["+id+"]");
 			//坦克初始化
 //			tank = new Tank(id, "坦克["+id+"]", randomPoint());
-			clientTank = new Tank(randomPoint(), id, "坦克["+id+"]");
+			clientTank = new Tank(randomPoint(), id,playerName);
 			System.out.println(clientTank);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "无法连接服务器！请确保服务器防火墙已关闭！");
+			System.exit(0);
+			System.out.println("链接出错！！！1");
 		} catch (IOException e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "无法连接服务器！请确保服务器防火墙已关闭！");
+			System.exit(0);
+			System.out.println("链接出错！！！2");
 		} catch (NumberFormatException e) {
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "无法连接服务器！请确保服务器防火墙已关闭！");
+			System.exit(0);
+			System.out.println("链接出错！！！3");
 		} catch (ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+			JOptionPane.showMessageDialog(null, "无法连接服务器！请确保服务器防火墙已关闭！");
+			System.exit(0);
+			System.out.println("链接出错！！！4");
 		}
 		
 	}
@@ -132,6 +150,8 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		OzBullet  = getImage("OzBullet.png");
 		EnemyBullet  = getImage("EnemyBullet.png");
 		MyBullet  = getImage("MyBullet.png");
+		//BackGround
+		BackGround = getImage("BackGround.png");
 	}
 	
 	public void sendAndGet(){
@@ -182,7 +202,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 
 		//检测自己有无被子弹打中
 		for(Tank tank:tanks){
-				clientTank.hit(tank.getBullets());
+				clientTank.hit(tank.getBullets(),bulletDamage);
 		}
 		
 		//检测自己的子弹有无打中其它玩家
@@ -264,7 +284,21 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		else if( tank.getLastDir()==DirKey.Down ){
 			gBuffer.drawImage(down, tank.getX(), tank.getY(), null);
 		}
+		final int dY=10;
+		final int dY2=5;
+		gBuffer.setColor(Color.GRAY);
+		gBuffer.drawRect(tank.getX(),tank.getY()-dY, Tank.FULL_HP, 6);
+		gBuffer.setFont(new Font("黑体", Font.BOLD, 10));
+		gBuffer.drawString(tank.getName(), tank.getX(), tank.getY()-dY-dY2);
+		if( tank.getId()==id ){
+			gBuffer.setColor(new Color(0,162,232));
+		}
+		else{
+			gBuffer.setColor(new Color(237,28,36));
+		}
+		gBuffer.fillRect(tank.getX()+1,tank.getY()-dY+1, tank.getHp()-1, 5);
 	}
+	
 
 	
 
@@ -321,12 +355,17 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		}
 		
 	}
+	int count=0;
 	//窗口关闭
 	@Override
 	public void windowClosing(WindowEvent e) {
 		System.out.println("按下了退出按钮");
 		//设置信息为 请求退出
 		message = Tank.M_EXIT_REQUEST;
+		count++;
+		if( count>=2 ){
+			System.exit(0);
+		}
 		
 	}
 
@@ -361,6 +400,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		}
 		gBuffer.setColor(Color.yellow);
 		gBuffer.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+		gBuffer.drawImage(BackGround, 0, 0, null);
 		if(firstTime){
 			//去除闪烁
 			gBuffer.drawImage(EnemyTank_Down, 2000, 2000, null);
@@ -410,11 +450,26 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	
 	public static void main(String[] args) {
 		
-		Client c =new Client();
+		String input = JOptionPane.showInputDialog("  ip / 玩家名称    [ 例: 10.10.22.46 / 奥茨 ] ");
+		System.out.println("input="+input);
 		
-		Thread th = new Thread(c);
+		if( input!=null ){
+			String s[] = input.split("/");
+			System.out.println(s.length);
+			String ip,playerName;
+			
+			if( s.length==2 ){
+				ip = s[0];
+				playerName = s[1];
+				
+				Client c =new Client(ip,playerName);
+				Thread th = new Thread(c);
+				th.start();
+			}
+			
+
+		}
 		
-		th.start();
 	}
 
 

@@ -99,7 +99,7 @@ public class Bullet implements Serializable{
 	
 	public void hit(ArrayList<Tank> tanks){
 		for(Tank tank:tanks){
-			if(tank.hit(this)){
+			if(tank.inside(this) && tank.getId()!=id && tank.isAlive() ){
 				this.setAlive(false);
 			}
 		}

@@ -11,6 +11,7 @@ public class Tank implements Serializable{
 	public static final int  WIDTH = 40;
 	public static final int HEIGHT = 40;
 	
+	public static final int FULL_HP = 40;
 	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2;
 	private int clientMessage = Tank.M_DEGFAULT;
 	
@@ -24,6 +25,7 @@ public class Tank implements Serializable{
 	private String  name;
 	private boolean alive;
 	private int     hp;
+
 	
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	
@@ -44,7 +46,7 @@ public class Tank implements Serializable{
 
 		this.clientMessage = Tank.M_DEGFAULT;
 		this.alive = true;
-		this.hp = 40;
+		this.hp = FULL_HP;
 		this.lastDir = DirKey.Up;
 	}
 	
@@ -118,32 +120,35 @@ public class Tank implements Serializable{
 	
 	
 	
-	public boolean hit(ArrayList<Bullet> bullets){
-		for(Bullet b:bullets){
-			//子弹活着的时候才有杀伤力
-			if( b.isAlive() && b.getId()!=id ){
-				if(b.getX()>x && b.getX()<x+WIDTH && b.getY()>y && b.getY()<y+HEIGHT ){
-					//暂时设置成 碰到子弹就死亡
-					this.setAlive(false);
-					return true;
-				}
-			}
-			
-		}
-		return false;
-	}
-	
-	public boolean hit(Bullet b){
-		if( b.isAlive() && b.getId()!=id ){
-			if(b.getX()>x && b.getX()<x+WIDTH && b.getY()>y && b.getY()<y+HEIGHT ){
-				//暂时设置成 碰到子弹就死亡
-				this.setAlive(false);
-				return true;
+	public boolean hit(ArrayList<Bullet> bullets,int damage){
+		if( this.isAlive() ){
+				for(Bullet b:bullets){
+					//子弹活着的时候才有杀伤力
+					if( b.isAlive() && b.getId()!=id ){
+						if(inside(b)){
+							//减HP
+							if( hp>0 ){
+								hp = hp - damage;
+							}
+							if( hp<=0 ){
+								this.setAlive(false);
+							}
+							return true;
+						}
+					}
 			}
 		}
 		return false;
 	}
 	
+	public boolean inside(Bullet b){
+		
+		if(b.getX()>x && b.getX()<x+WIDTH && b.getY()>y && b.getY()<y+HEIGHT ){
+			return true;
+		}
+		return false;
+		
+	}
 
 
 	
