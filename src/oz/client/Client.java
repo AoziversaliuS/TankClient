@@ -37,7 +37,6 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	private ObjectInputStream ois;
 	private ObjectOutputStream oos;
 	private int id;
-	private boolean closed = false;
 	private int message = Tank.M_DEGFAULT;
 	
 	//MyTank
@@ -55,6 +54,10 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	Image OzTank_Right;
 	Image OzTank_Up;
 	Image OzTank_Down;
+	//Bullet
+	Image OzBullet;
+	Image EnemyBullet;
+	Image MyBullet;
 	
 	Image imageBuffer;
 	Graphics gBuffer;
@@ -65,7 +68,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	private DirKey selectKey = DirKey.Else;
 	
 	private final int tankSpeed = 4;
-	private final int bulletSpeed = 10;
+	private final int bulletSpeed = 6;
 	
 	private boolean fire = false;
 	
@@ -125,8 +128,28 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		OzTank_Right = getImage("OzTank_Right.png");
 		OzTank_Up    = getImage("OzTank_Up.png"); 
 		OzTank_Down  = getImage("OzTank_Down.png");
+		//Bullet
+		OzBullet  = getImage("OzBullet.png");
+		EnemyBullet  = getImage("EnemyBullet.png");
+		MyBullet  = getImage("MyBullet.png");
 	}
 	
+	public void sendAndGet(){
+		try {
+			//发送自己的坦克信息给服务器
+				oos.reset();
+				oos.writeObject(clientTank);
+				oos.flush();
+				//获取服务器中所有玩家的坦克数据
+				tanks = (ArrayList<Tank>) ois.readObject();
+				
+		} catch (IOException e) {
+			System.exit(0);
+//			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+	}
 	
 	
 	public void logic(){
@@ -149,83 +172,81 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 				break;
 			}
 		}
-		System.out.println("子弹数量为:"+clientTank.getBullets().size());
 		
 		//保存要发给服务器的信息
 		clientTank.setClientMessage(message);
 		
 		
-		
-		if(!closed){
-//			System.out.println("还在");
-			try {
-				
-				//发送自己的坦克信息给服务器
-					oos.reset();
-					oos.writeObject(clientTank);
-					oos.flush();
-					//获取服务器数据
-					tanks = (ArrayList<Tank>) ois.readObject();
-					
-					
-			} catch (IOException e) {
-				System.exit(0);
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
+		//发送自己的坦克数据给服务器，并从服务器拿到所有玩家的坦克数据
+		sendAndGet();
+
+		//检测自己有无被子弹打中
+		for(Tank tank:tanks){
+			if( tank.getId()!=id ){
+				clientTank.hit(tank.getBullets());
 			}
+			
 		}
 		
+		//检测自己的子弹有无打中其它玩家
+		for(Bullet b:clientTank.getBullets()){
+			b.hit(tanks);
+		}
+			
+		
 	}
+	
+	
+	
 	public void draw(){
 		
+		
+		
+		//画子弹
 		if( tanks!=null ){
+			
 			for(Tank tank:tanks){
 				if( tank.getId()==id ){
-					//根据方向来画对应的图片  玩家
-					if( tank.getLastDir()==DirKey.Up ){
-						gBuffer.drawImage(MyTank_Up, tank.getX(), tank.getY(), null);
-					}
-					else if( tank.getLastDir()==DirKey.Left ){
-						gBuffer.drawImage(MyTank_Left, tank.getX(), tank.getY(), null);
-					}
-					else if( tank.getLastDir()==DirKey.Right ){
-						gBuffer.drawImage(MyTank_Right, tank.getX(), tank.getY(), null);
-					}
-					else if( tank.getLastDir()==DirKey.Down ){
-						gBuffer.drawImage(MyTank_Down, tank.getX(), tank.getY(), null);
-					}
-					//若服务器允许此客户端退出，则关闭与服务器的链接并退出
-					if( tank.getClientMessage()==Tank.M_EXIT_PERMIT ){
-						try {
-							oos.close();
-							ois.close();
-							socket.close();
-							closed = true;
-							System.exit(0);
-							System.out.println("退出了！！！！");
-						} catch (IOException e) {
-							e.printStackTrace();
+					for(Bullet b:tank.getBullets()){
+						if( b.isAlive() ){
+							gBuffer.drawImage(MyBullet, b.getX(), b.getY(), null);
 						}
 					}
 				}
 				else{
-					//根据方向来画对应的图片 敌人
-					if( tank.getLastDir()==DirKey.Up ){
-						gBuffer.drawImage(EnemyTank_Up, tank.getX(), tank.getY(), null);
-					}
-					else if( tank.getLastDir()==DirKey.Left ){
-						gBuffer.drawImage(EnemyTank_Left, tank.getX(), tank.getY(), null);
-					}
-					else if( tank.getLastDir()==DirKey.Right ){
-						gBuffer.drawImage(EnemyTank_Right, tank.getX(), tank.getY(), null);
-					}
-					else if( tank.getLastDir()==DirKey.Down ){
-						gBuffer.drawImage(EnemyTank_Down, tank.getX(), tank.getY(), null);
+					for(Bullet b:tank.getBullets()){
+						if( b.isAlive() ){
+							gBuffer.drawImage(EnemyBullet, b.getX(), b.getY(), null);
+						}
 					}
 				}
 				
-				
+			}
+			//画坦克
+			for(Tank tank:tanks){
+				if( tank.isAlive() ){
+					if( tank.getId()==id ){
+						//根据方向来画对应的图片  玩家
+						drawTank(MyTank_Up, MyTank_Down, MyTank_Left, MyTank_Right, tank);
+						
+						//若服务器允许此客户端退出，则关闭与服务器的链接并退出
+						if( tank.getClientMessage()==Tank.M_EXIT_PERMIT ){
+//							try {
+//								oos.close();
+//								ois.close();
+//								socket.close();
+								System.exit(0);
+								System.out.println("退出了！！！！");
+//							} catch (IOException e) {
+//								e.printStackTrace();
+//							}
+						}
+					}
+					else{
+						//根据方向来画对应的图片 敌人
+						drawTank(EnemyTank_Up, EnemyTank_Down, EnemyTank_Left, EnemyTank_Right, tank);
+					}
+				}
 			}
 		}
 		
@@ -233,7 +254,20 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 
 
 
-
+	public void drawTank(Image up,Image down,Image left,Image right,Tank tank){
+		if( tank.getLastDir()==DirKey.Up ){
+			gBuffer.drawImage(up, tank.getX(), tank.getY(), null);
+		}
+		else if( tank.getLastDir()==DirKey.Left ){
+			gBuffer.drawImage(left, tank.getX(), tank.getY(), null);
+		}
+		else if( tank.getLastDir()==DirKey.Right ){
+			gBuffer.drawImage(right, tank.getX(), tank.getY(), null);
+		}
+		else if( tank.getLastDir()==DirKey.Down ){
+			gBuffer.drawImage(down, tank.getX(), tank.getY(), null);
+		}
+	}
 
 	
 
@@ -267,28 +301,26 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			if( selectKey==DirKey.Up ){
 				selectKey = DirKey.Else;
 			}
-			System.out.println(selectKey);
 		}
 		else if( e.getKeyCode()==KeyEvent.VK_LEFT ){
 			if( selectKey==DirKey.Left ){
 				selectKey = DirKey.Else;
 			}
-			System.out.println(selectKey);
 		}
 		else if( e.getKeyCode()==KeyEvent.VK_RIGHT ){
 			if( selectKey==DirKey.Right ){
 				selectKey = DirKey.Else;
 			}
-			System.out.println(selectKey);
 		}
 		else if( e.getKeyCode()==KeyEvent.VK_DOWN ){
 			if( selectKey==DirKey.Down ){
 				selectKey = DirKey.Else;
 			}
-			System.out.println(selectKey);
 		}
 		else if( e.getKeyCode()==KeyEvent.VK_SPACE ){
-			fire = true;
+			if( clientTank.isAlive() ){
+				fire = true;
+			}
 		}
 		
 	}
@@ -308,11 +340,13 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 
 	@Override
 	public void run() {
-		while(!closed){
-			
+		while(true){
+			long start = System.currentTimeMillis();
 			logic();
+			long cost = System.currentTimeMillis() - start;
 			repaint();
-//			System.out.println("select: "+selectKey);
+			
+//			System.out.println("[客户端]逻辑耗时: "+cost);
 		}
 		
 	}
@@ -346,6 +380,10 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			gBuffer.drawImage(OzTank_Left, 2000, 2000, null);
 			gBuffer.drawImage(OzTank_Right, 2000, 2000, null);
 			gBuffer.drawImage(OzTank_Up, 2000, 2000, null);
+			
+			gBuffer.drawImage(EnemyBullet, 2000, 2000, null);
+			gBuffer.drawImage(OzBullet, 2000, 2000, null);
+			gBuffer.drawImage(MyBullet, 2000, 2000, null);
 			
 			firstTime = false;
 		}

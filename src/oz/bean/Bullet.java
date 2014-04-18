@@ -1,13 +1,14 @@
 package oz.bean;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 import oz.type.DirKey;
 
 public class Bullet implements Serializable{
 	
 	//子弹即是一个点
-	
+	private int id;
 	private int x;
 	private int y;
 	private DirKey dir;
@@ -53,6 +54,15 @@ public class Bullet implements Serializable{
 
 
 	public Bullet() {
+	}
+	
+	
+	public void hit(ArrayList<Tank> tanks){
+		for(Tank tank:tanks){
+			if(tank.hit(this)){
+				this.setAlive(false);
+			}
+		}
 	}
 	
 	
