@@ -25,9 +25,16 @@ public class Tank implements Serializable{
 	private boolean alive;
 	private int     hp;
 	
+	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	
 	
-	
+	public ArrayList<Bullet> getBullets() {
+		return bullets;
+	}
+
+
+
+
 	public Tank(Point p, int id,String name) {
 
 		this.x = p.x;
@@ -60,7 +67,10 @@ public class Tank implements Serializable{
 		this.alive = alive;
 		this.hp = hp;
 	}
-
+	
+	public void fire(){
+			bullets.add(new Bullet(this.getCenter().x, this.getCenter().y, lastDir));
+	}
 
 
 

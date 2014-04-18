@@ -20,6 +20,7 @@ import java.util.ArrayList;
 
 import javax.swing.JFrame;
 
+import oz.bean.Bullet;
 import oz.bean.Tank;
 import oz.type.DirKey;
 
@@ -58,11 +59,14 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	Image imageBuffer;
 	Graphics gBuffer;
 	
-	Tank tank;
+	Tank clientTank;
 	ArrayList<Tank> tanks;
 	
 	private DirKey selectKey = DirKey.Else;
-	private final int speed = 4;
+	
+	private final int tankSpeed = 4;
+	private final int bulletSpeed = 10;
+	
 	private boolean fire = false;
 	
 	public Client(){
@@ -89,8 +93,8 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			this.setTitle("[奥茨制作]多人坦克大战客户端 ["+id+"]");
 			//坦克初始化
 //			tank = new Tank(id, "坦克["+id+"]", randomPoint());
-			tank = new Tank(randomPoint(), id, "坦克["+id+"]");
-			System.out.println(tank);
+			clientTank = new Tank(randomPoint(), id, "坦克["+id+"]");
+			System.out.println(clientTank);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
@@ -127,11 +131,28 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	
 	public void logic(){
 		
-		
-		tank.active(selectKey, speed,SCREEN_WIDTH,SCREEN_HEIGHT);
+		//坦克移动
+		clientTank.active(selectKey, tankSpeed,SCREEN_WIDTH,SCREEN_HEIGHT);
+		//开火
+		if( fire==true ){
+			clientTank.fire();
+			fire = false;
+		}
+		//子弹移动
+		for(Bullet b:clientTank.getBullets()){
+			b.active(bulletSpeed);
+		}
+		//删除越界的子弹
+		for(int i=0; i<clientTank.getBullets().size(); i++){
+			if( !clientTank.getBullets().get(i).inRange(SCREEN_WIDTH, SCREEN_HEIGHT) ){
+				clientTank.getBullets().remove(i);
+				break;
+			}
+		}
+		System.out.println("子弹数量为:"+clientTank.getBullets().size());
 		
 		//保存要发给服务器的信息
-		tank.setClientMessage(message);
+		clientTank.setClientMessage(message);
 		
 		
 		
@@ -141,7 +162,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 				
 				//发送自己的坦克信息给服务器
 					oos.reset();
-					oos.writeObject(tank);
+					oos.writeObject(clientTank);
 					oos.flush();
 					//获取服务器数据
 					tanks = (ArrayList<Tank>) ois.readObject();

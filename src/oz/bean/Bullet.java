@@ -73,6 +73,17 @@ public class Bullet implements Serializable{
 		
 	}
 	
+	public boolean inRange(int screenWidth,int screenHeight){
+		//ÅĞ¶Ï×Óµ¯ÊÇ·ñÔÚÆÁÄ»·¶Î§ÄÚ
+		if(this.x<screenWidth && this.y<screenHeight && this.x>0 && this.y>0 ){
+			return true;
+		}
+		else{
+			return false;
+		}
+		
+	}
+	
 	
 
 
