@@ -13,25 +13,43 @@ public class Tank implements Serializable{
 	
 	public static final int FULL_HP = 40;
 	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2;
-	private int clientMessage = Tank.M_DEGFAULT;
 	
+	private int clientMessage = Tank.M_DEGFAULT;
 	private int x;
 	private int y;
-
 	private DirKey lastDir = DirKey.Up;
 
+	public static final int GENERAL = 5,OZ_TANK=6;
+	
+	private int type = GENERAL;
 	
 	private int     id;
 	private String  name;
 	private boolean alive;
 	private int     hp;
-
+	
+	private int cx;
+	private int cy;
+	private int cwidth;
+	private int cheight;
+	private int count = 0;
+	private boolean deadFinish=false;
+	
+	public static final int DEAD_1=3,DEAD_2=4;
+	private int deadStatus=0;
 	
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	
 	
 	public ArrayList<Bullet> getBullets() {
 		return bullets;
+	}
+
+
+
+
+	public boolean isDeadFinish() {
+		return deadFinish;
 	}
 
 
@@ -84,33 +102,62 @@ public class Tank implements Serializable{
 
 
 	public void active(DirKey key,int speed,int screenWidth,int screenHeight){
-		final int OFFSET = 25;
-		if( key!=DirKey.Else ){
-			//保存坦克方向,画图时用
-			lastDir = key;
-		}
-		
-		if( key==DirKey.Up ){
-			if( this.y>OFFSET ){
-				this.y = this.y - speed;
+		if( alive ){
+			final int OFFSET = 25;
+			if( key!=DirKey.Else ){
+				//保存坦克方向,画图时用
+				lastDir = key;
 			}
 			
-		}
-		else if( key==DirKey.Down ){
-			if( this.y<screenHeight-HEIGHT ){
-				this.y = this.y + speed;
+			if( key==DirKey.Up ){
+				if( this.y>OFFSET ){
+					this.y = this.y - speed;
+				}
+				
+			}
+			else if( key==DirKey.Down ){
+				if( this.y<screenHeight-HEIGHT ){
+					this.y = this.y + speed;
+				}
+			}
+			else if( key==DirKey.Left ){
+				if( this.x>0 ){
+					this.x = this.x - speed;
+				}
+			}
+			else if( key==DirKey.Right ){
+				if( this.x<screenWidth-WIDTH ){
+					this.x = this.x + speed;
+				}
 			}
 		}
-		else if( key==DirKey.Left ){
-			if( this.x>0 ){
-				this.x = this.x - speed;
+		else{
+			final int RANGE = 3;
+			final int MAX_COUNT = 25;
+			if( deadStatus==DEAD_1 ){
+				cx = cx - RANGE;
+				cy = cy - RANGE;
+				cwidth = cwidth + 2*RANGE;
+				cheight = cheight + 2*RANGE;
+				count++;
+				if( count>=MAX_COUNT ){
+					deadStatus=DEAD_2;
+					count=0;
+				}
+			}
+			else if( deadStatus==DEAD_2 ){
+				cx = cx + RANGE;
+				cy = cy + RANGE;
+				cwidth = cwidth - 2*RANGE;
+				cheight = cheight - 2*RANGE;
+				count++;
+				if( count>=MAX_COUNT ){
+					deadStatus++;
+					deadFinish = true;
+				}
 			}
 		}
-		else if( key==DirKey.Right ){
-			if( this.x<screenWidth-WIDTH ){
-				this.x = this.x + speed;
-			}
-		}
+
 	}
 	
 	
@@ -132,6 +179,11 @@ public class Tank implements Serializable{
 							}
 							if( hp<=0 ){
 								this.setAlive(false);
+								cx = this.x;
+								cy = this.y;
+								cwidth = WIDTH;
+								cheight = HEIGHT;
+								deadStatus = DEAD_1;
 							}
 							return true;
 						}
@@ -183,6 +235,48 @@ public class Tank implements Serializable{
 	
 	
 	
+	public int getType() {
+		return type;
+	}
+
+
+
+
+	public void setType(int type) {
+		this.type = type;
+	}
+
+
+
+
+	public int getCx() {
+		return cx;
+	}
+
+
+
+
+	public int getCy() {
+		return cy;
+	}
+
+
+
+
+	public int getCwidth() {
+		return cwidth;
+	}
+
+
+
+
+	public int getCheight() {
+		return cheight;
+	}
+
+
+
+
 	public int getClientMessage() {
 		return clientMessage;
 	}

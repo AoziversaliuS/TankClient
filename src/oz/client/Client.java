@@ -11,9 +11,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -24,20 +27,24 @@ import javax.swing.JOptionPane;
 
 import oz.bean.Bullet;
 import oz.bean.Tank;
+import oz.tool.Oz;
 import oz.type.DirKey;
 
 public class Client extends JFrame implements Runnable,KeyListener,WindowListener{
 	private static Toolkit tool = Toolkit.getDefaultToolkit();
 	
 	public static final int SCREEN_WIDTH = 600, SCREEN_HEIGHT = 600;
-	public static final int SERVER_PORT = 9090;
+	public static  int SERVER_PORT = 9090;
 	private boolean firstTime=true;
 	
 	private static String ip="127.0.0.1";
 	
 	private Socket socket;
-	private ObjectInputStream ois;
-	private ObjectOutputStream oos;
+//	private ObjectInputStream ois;
+//	private ObjectOutputStream oos;
+	private PrintWriter out;
+	private BufferedReader in;
+	
 	private int id;
 	private int message = Tank.M_DEGFAULT;
 	
@@ -67,18 +74,20 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	Graphics gBuffer;
 	
 	Tank clientTank;
-	ArrayList<Tank> tanks;
+	ArrayList<Tank> tanks = new ArrayList<Tank>();
 	
 	private DirKey selectKey = DirKey.Else;
 	
-	private final int tankSpeed = 4;
-	private final int bulletSpeed = 6;
-	private final int bulletDamage = 3;
+	private  int tankSpeed = 2;
+	private  int bulletSpeed = 6;
+	private  int bulletDamage = 3;
 	
 	private boolean fire = false;
 	
-	public Client(String ip,String playerName){
+	public Client(String ip,String playerName,String tankName,int tankSpeed,int bulletSpeed,int bulletDamage){
 		Client.ip = ip;
+		
+		
 		
 		imageInit();
 		
@@ -95,14 +104,24 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		
 		try {
 			socket = new Socket(ip, SERVER_PORT);
-			ois = new ObjectInputStream(socket.getInputStream());
-			oos = new ObjectOutputStream(socket.getOutputStream());
-			id = Integer.parseInt((String)ois.readObject());
+//			ois = new ObjectInputStream(socket.getInputStream());
+//			oos = new ObjectOutputStream(socket.getOutputStream());
+			in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+			out = new PrintWriter(socket.getOutputStream());
+			
+			id = Integer.parseInt(in.readLine());
 			System.out.println("从服务器收到id="+id);
 			this.setTitle("[奥茨制作]多人坦克大战客户端 ["+id+"]");
 			//坦克初始化
-//			tank = new Tank(id, "坦克["+id+"]", randomPoint());
 			clientTank = new Tank(randomPoint(), id,playerName);
+			
+			if( tankName.trim().equals("OZTANK") ){
+				clientTank.setType(Tank.OZ_TANK);
+			}
+			this.tankSpeed = tankSpeed;
+			this.bulletSpeed = bulletSpeed;
+			this.bulletDamage = bulletDamage;
+			
 			System.out.println(clientTank);
 		} catch (UnknownHostException e) {
 			e.printStackTrace();
@@ -119,13 +138,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			JOptionPane.showMessageDialog(null, "无法连接服务器！请确保服务器防火墙已关闭！");
 			System.exit(0);
 			System.out.println("链接出错！！！3");
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(null, "无法连接服务器！请确保服务器防火墙已关闭！");
-			System.exit(0);
-			System.out.println("链接出错！！！4");
-		}
+		} 
 		
 	}
 	
@@ -157,18 +170,17 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	public void sendAndGet(){
 		try {
 			//发送自己的坦克信息给服务器
-				oos.reset();
-				oos.writeObject(clientTank);
-				oos.flush();
+				String sendBuf = Oz.tankString(clientTank);
+				out.println(sendBuf);
+				out.flush();
 				//获取服务器中所有玩家的坦克数据
-				tanks = (ArrayList<Tank>) ois.readObject();
+				String recvBuf = in.readLine();
+				Oz.getTanks(recvBuf, tanks);
 				
 		} catch (IOException e) {
 			System.exit(0);
 //			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 	
 	
@@ -223,10 +235,17 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		if( tanks!=null ){
 			
 			for(Tank tank:tanks){
-				if( tank.getId()==id ){
+				if( tank.getId()==id && tank.getType()!=Tank.OZ_TANK ){
 					for(Bullet b:tank.getBullets()){
 						if( b.isAlive() ){
 							gBuffer.drawImage(MyBullet, b.getX(), b.getY(), null);
+						}
+					}
+				}
+				else if( tank.getType()==Tank.OZ_TANK ){
+					for(Bullet b:tank.getBullets()){
+						if( b.isAlive() ){
+							gBuffer.drawImage(OzBullet, b.getX(), b.getY(), null);
 						}
 					}
 				}
@@ -242,26 +261,42 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			//画坦克
 			for(Tank tank:tanks){
 				if( tank.isAlive() ){
-					if( tank.getId()==id ){
+					if( tank.getType()==Tank.OZ_TANK ){
+						//奥兹专用坦克
+						drawTank(OzTank_Up, OzTank_Down, OzTank_Left, OzTank_Right, tank);
+					}
+				    else if( tank.getId()==id ){
 						//根据方向来画对应的图片  玩家
 						drawTank(MyTank_Up, MyTank_Down, MyTank_Left, MyTank_Right, tank);
 						
-						//若服务器允许此客户端退出，则关闭与服务器的链接并退出
-						if( tank.getClientMessage()==Tank.M_EXIT_PERMIT ){
-//							try {
-//								oos.close();
-//								ois.close();
-//								socket.close();
-								System.exit(0);
-								System.out.println("退出了！！！！");
-//							} catch (IOException e) {
-//								e.printStackTrace();
-//							}
-						}
+						
 					}
 					else{
 						//根据方向来画对应的图片 敌人
 						drawTank(EnemyTank_Up, EnemyTank_Down, EnemyTank_Left, EnemyTank_Right, tank);
+					}
+				    
+				  //若服务器允许此客户端退出，则关闭与服务器的链接并退出
+					if(tank.getId()==id && tank.getClientMessage()==Tank.M_EXIT_PERMIT ){
+//						try {
+//							oos.close();
+//							ois.close();
+//							socket.close();
+							System.exit(0);
+							System.out.println("退出了！！！！");
+//						} catch (IOException e) {
+//							e.printStackTrace();
+//						}
+					}
+				}
+				else{
+					final int dX=7,dY=7;
+					
+					if( !tank.isDeadFinish() ){
+						gBuffer.setColor(new Color(50,205,50));
+						gBuffer.fillOval(tank.getCx(), tank.getCy(), tank.getCwidth(), tank.getCheight());
+						gBuffer.setColor(new Color(255,242,0));
+						gBuffer.fillOval(tank.getCx()+dX, tank.getCy()+dY, tank.getCwidth()-2*dX, tank.getCheight()-2*dY);
 					}
 				}
 			}
@@ -290,8 +325,11 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		gBuffer.drawRect(tank.getX(),tank.getY()-dY, Tank.FULL_HP, 6);
 		gBuffer.setFont(new Font("黑体", Font.BOLD, 10));
 		gBuffer.drawString(tank.getName(), tank.getX(), tank.getY()-dY-dY2);
-		if( tank.getId()==id ){
+		if( tank.getId()==id && tank.getType()!=Tank.OZ_TANK ){
 			gBuffer.setColor(new Color(0,162,232));
+		}
+		else if( tank.getType()==Tank.OZ_TANK ){
+			gBuffer.setColor(new Color(34,177,36));
 		}
 		else{
 			gBuffer.setColor(new Color(237,28,36));
@@ -450,25 +488,61 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	
 	public static void main(String[] args) {
 		
-		String input = JOptionPane.showInputDialog("  ip / 玩家名称    [ 例: 10.10.22.46 / 奥茨 ] ");
-		System.out.println("input="+input);
 		
-		if( input!=null ){
-			String s[] = input.split("/");
-			System.out.println(s.length);
-			String ip,playerName;
+//		String ip = JOptionPane.showInputDialog("请输入服务器ip:");
+//		String name = JOptionPane.showInputDialog("请输入玩家名:");
+////		new Client(ip, playerName, tankName, tankSpeed, bulletSpeed, bulletDamage)
+//		Client c =new Client(ip,name,"OZTANK",4,6,3);
+//		Thread th = new Thread(c);
+//		th.start();
+		
+		
+		
+		
+		String name=null;
+		String ip = JOptionPane.showInputDialog("请输入服务器ip:");
+//		SERVER_PORT = Integer.parseInt(JOptionPane.showInputDialog("请输入服务器端口:"));
+		if( ip!=null ){
+			 name = JOptionPane.showInputDialog("请输入玩家名:");
+		}
+
+//		new Client(ip, playerName, tankName, tankSpeed, bulletSpeed, bulletDamage)
+		if( ip!=null && name!=null ){
 			
-			if( s.length==2 ){
-				ip = s[0];
-				playerName = s[1];
-				
-				Client c =new Client(ip,playerName);
+		String str[] = name.split("/");
+		if( str.length==5 ){
+			Client c =new Client(ip,str[0],str[1],Integer.parseInt(str[2]),Integer.parseInt(str[3]),Integer.parseInt(str[4]));
+			Thread th = new Thread(c);
+			th.start();
+		}
+		else{
+				Client c =new Client(ip,name,"",4,6,3);
 				Thread th = new Thread(c);
 				th.start();
 			}
 			
-
 		}
+		
+		
+//		
+//		if( input!=null ){
+//			String s[] = input.split("/");
+//			System.out.println(s.length);
+//			String ip,playerName;
+//			
+//			if( s.length==2 ){
+//				ip = s[0];
+//				playerName = s[1];
+//				
+//				Client c =new Client(ip,playerName);
+//				Thread th = new Thread(c);
+//				th.start();
+//			}
+//		}
+		
+//		Client c =new Client("127.0.0.1","LUXION");
+//		Thread th = new Thread(c);
+//		th.start();
 		
 	}
 
