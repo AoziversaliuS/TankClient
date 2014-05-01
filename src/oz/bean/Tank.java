@@ -14,30 +14,56 @@ public class Tank implements Serializable{
 	public static final int FULL_HP = 40;
 	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2;
 	
-	private int clientMessage = Tank.M_DEGFAULT;
-	private int x;
-	private int y;
-	private DirKey lastDir = DirKey.Up;
+	public static final int DEAD_1=3,DEAD_2=4;
 
 	public static final int GENERAL = 5,OZ_TANK=6;
 	
-	private int type = GENERAL;
 	
-	private int     id;
+	
+	private int id;
 	private String  name;
+	private int x;
+	private int y;
+	private DirKey lastDir = DirKey.Up;
 	private boolean alive;
-	private int     hp;
-	
+	private int hp;
 	private int cx;
 	private int cy;
 	private int cwidth;
 	private int cheight;
 	private int count = 0;
 	private boolean deadFinish=false;
-	
-	public static final int DEAD_1=3,DEAD_2=4;
 	private int deadStatus=0;
+	private int type = GENERAL;
+	private int clientMessage = Tank.M_DEGFAULT;
 	
+
+
+	
+	public Tank(int id, String name, int x, int y, DirKey lastDir,
+			boolean alive, int hp, int cx, int cy, int cwidth, int cheight,
+			int count, boolean deadFinish, int deadStatus, int type,
+			int clientMessage) {
+		super();
+		this.id = id;
+		this.name = name;
+		this.x = x;
+		this.y = y;
+		this.lastDir = lastDir;
+		this.alive = alive;
+		this.hp = hp;
+		this.cx = cx;
+		this.cy = cy;
+		this.cwidth = cwidth;
+		this.cheight = cheight;
+		this.count = count;
+		this.deadFinish = deadFinish;
+		this.deadStatus = deadStatus;
+		this.type = type;
+		this.clientMessage = clientMessage;
+	}
+
+
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 	
 	
@@ -235,6 +261,20 @@ public class Tank implements Serializable{
 	
 	
 	
+	public int getCount() {
+		return count;
+	}
+
+
+
+
+	public int getDeadStatus() {
+		return deadStatus;
+	}
+
+
+
+
 	public int getType() {
 		return type;
 	}

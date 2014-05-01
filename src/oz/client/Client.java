@@ -74,7 +74,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	Graphics gBuffer;
 	
 	Tank clientTank;
-	ArrayList<Tank> tanks = new ArrayList<Tank>();
+	ArrayList<Tank> tanks;
 	
 	private DirKey selectKey = DirKey.Else;
 	
@@ -175,12 +175,14 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 				out.flush();
 				//获取服务器中所有玩家的坦克数据
 				String recvBuf = in.readLine();
-				Oz.getTanks(recvBuf, tanks);
+				tanks = Oz.getTanks(recvBuf);
 				
 		} catch (IOException e) {
 			System.exit(0);
 //			e.printStackTrace();
-		} 
+		} catch(NullPointerException e){
+			System.exit(0);
+		}
 	}
 	
 	
@@ -430,13 +432,14 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		draw();
 		g.drawImage(imageBuffer, 0, 0, null);
 	}
+	private Color bgColor = new Color(239,228,176);
 	private void bufferReset(){
 		if( imageBuffer==null ){
 			imageBuffer = this.createImage(SCREEN_WIDTH, SCREEN_HEIGHT);
 			gBuffer = imageBuffer.getGraphics();
 			System.out.println("初始化");
 		}
-		gBuffer.setColor(Color.yellow);
+		gBuffer.setColor(bgColor);
 		gBuffer.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
 		gBuffer.drawImage(BackGround, 0, 0, null);
 		if(firstTime){
@@ -516,7 +519,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			th.start();
 		}
 		else{
-				Client c =new Client(ip,name,"",4,6,3);
+				Client c =new Client(ip,name,"",2,3,3);
 				Thread th = new Thread(c);
 				th.start();
 			}
