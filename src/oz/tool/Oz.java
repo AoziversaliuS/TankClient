@@ -26,12 +26,10 @@ public class Oz {
 							+booleanString(t.isDeadFinish())+","
 							+t.getDeadStatus()+","
 							+t.getType()+","
-							+t.getClientMessage()+",";
-//		private int id;
-//		private int x;
-//		private int y;
-//		private DirKey dir;
-//		private boolean alive = true;
+							+t.getClientMessage()+","
+							+t.getServerMsg()+","
+							+t.getRoundNum()+","
+							+t.getRoundCount()+",";
 		for(Bullet b:t.getBullets()){
 			tankString = tankString 
 					+b.getId()+"+"
@@ -61,12 +59,17 @@ public class Oz {
 				decodeBoolean(d[12]),
 				dI(d[13]),
 				dI(d[14]),
-				dI(d[15])
+				dI(d[15]),
+				dI(d[16]),
+				dI(d[17]),
+				dI(d[18])
 				);
-		if( d.length==17 ){
-			String[] db = d[16].split("/");
+		if( d.length==20 ){
+			String[] db = d[d.length-1].split("/");
 			for(int i=0;i<db.length;i++){
+
 				String[] bs=db[i].split("[+]");
+				
 				tank.getBullets().add(new Bullet(
 						dI(bs[0]),
 						dI(bs[1]),
@@ -153,23 +156,24 @@ public class Oz {
 		return Integer.parseInt(iString.trim());
 	}
 	
-//	public static void main(String[] args) {
-//		String s = tankString(new Tank(new Point(5, 5), 7, "asd"));
-//		System.out.println(s);
+	public static void main(String[] args) {
+		String s = tankString(new Tank(new Point(5, 5), 7, "asd"));
+//		String s = tankString(n);
+		System.out.println(s);
 //		Tank t = getTank(s);
-////		System.out.println("生成的坦克是:"+t.toString());
-////		ArrayList<Tank> tanks = new ArrayList<Tank>();
-////		tanks.add(new Tank(new Point(5, 5), 7, "asd"));
-////		tanks.add(new Tank(new Point(5, 5), 7, "asd"));
-////		tanks.add(new Tank(new Point(4, 4), 6, "212"));
-////		tanks.add(new Tank(new Point(4, 4), 6, "212"));
-////		String s = tanksString(tanks);
-////		System.out.println("tanksStrin="+s);
-////		ArrayList<Tank> tanks2 = new ArrayList<Tank>();
-////		for(Tank t:tanks2){
-////			System.out.println(t);
-////		}
-////		System.out.println("获取到tanks2="+tanks2.size());
-//	}
+//		System.out.println("生成的坦克是:"+t.toString());
+//		ArrayList<Tank> tanks = new ArrayList<Tank>();
+//		tanks.add(new Tank(new Point(5, 5), 7, "asd"));
+//		tanks.add(new Tank(new Point(5, 5), 7, "asd"));
+//		tanks.add(new Tank(new Point(4, 4), 6, "212"));
+//		tanks.add(new Tank(new Point(4, 4), 6, "212"));
+//		String s = tanksString(tanks);
+//		System.out.println("tanksStrin="+s);
+//		ArrayList<Tank> tanks2 = new ArrayList<Tank>();
+//		for(Tank t:tanks2){
+//			System.out.println(t);
+//		}
+//		System.out.println("获取到tanks2="+tanks2.size());
+	}
 
 }

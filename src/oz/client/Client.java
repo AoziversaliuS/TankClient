@@ -49,7 +49,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	private int message = Tank.M_DEGFAULT;
 	
 	//BackGround
-	Image BackGround;
+//	Image BackGround;
 	//MyTank
 	Image MyTank_Left;
 	Image MyTank_Right;
@@ -166,7 +166,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		EnemyBullet  = getImage("EnemyBullet.png");
 		MyBullet  = getImage("MyBullet.png");
 		//BackGround
-		BackGround = getImage("BackGround.png");
+//		BackGround = getImage("BackGround.png");
 	}
 	
 	public void sendAndGet(){
@@ -474,7 +474,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		}
 		gBuffer.setColor(bgColor);
 		gBuffer.fillRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-		gBuffer.drawImage(BackGround, 0, 0, null);
+//		gBuffer.drawImage(BackGround, 0, 0, null);
 		if(firstTime){
 			//»•≥˝…¡À∏
 			gBuffer.drawImage(EnemyTank_Down, 2000, 2000, null);

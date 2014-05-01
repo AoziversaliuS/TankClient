@@ -12,13 +12,15 @@ public class Tank implements Serializable{
 	public static final int HEIGHT = 40;
 	
 	public static final int FULL_HP = 40;
-	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2,ROUND_SWITCHING=3;
-	
+	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2;
+
 	public static final int DEAD_1=3,DEAD_2=4;
 
 	public static final int GENERAL = 5,OZ_TANK=6,BLACK_TANK=7;
 	
+	public static final int S_ROUND_SWITCHING=8,S_PLAYING=9;
 	
+
 	
 	private int id;
 	private String  name;
@@ -37,13 +39,78 @@ public class Tank implements Serializable{
 	private int type = GENERAL;
 	private int clientMessage = Tank.M_DEGFAULT;
 	
-
+	private int serverMsg=S_PLAYING;
+	private int roundNum;
+	private int roundCount;
+	
+	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 
 	
+
+	public void reset(){
+		serverMsg=S_PLAYING;
+		this.hp = FULL_HP;
+		bullets.clear();
+		deadStatus=0;
+		count=0;
+		deadFinish=false;
+		alive=true;
+	}
+
+	
+	
+	public int getServerMsg() {
+		return serverMsg;
+	}
+
+
+
+
+
+	public void setServerMsg(int serverMsg) {
+		this.serverMsg = serverMsg;
+	}
+
+
+
+
+
+	public int getRoundNum() {
+		return roundNum;
+	}
+
+
+
+
+
+	public void setRoundNum(int roundNum) {
+		this.roundNum = roundNum;
+	}
+
+
+
+
+
+	public int getRoundCount() {
+		return roundCount;
+	}
+
+
+
+
+
+	public void setRoundCount(int roundCount) {
+		this.roundCount = roundCount;
+	}
+
+
+
+
+
 	public Tank(int id, String name, int x, int y, DirKey lastDir,
 			boolean alive, int hp, int cx, int cy, int cwidth, int cheight,
 			int count, boolean deadFinish, int deadStatus, int type,
-			int clientMessage) {
+			int clientMessage, int serverMsg, int roundNum, int roundCount) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -61,12 +128,15 @@ public class Tank implements Serializable{
 		this.deadStatus = deadStatus;
 		this.type = type;
 		this.clientMessage = clientMessage;
+		this.serverMsg = serverMsg;
+		this.roundNum = roundNum;
+		this.roundCount = roundCount;
 	}
 
 
-	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
-	
-	
+
+
+
 	public ArrayList<Bullet> getBullets() {
 		return bullets;
 	}
