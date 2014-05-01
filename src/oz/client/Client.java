@@ -82,6 +82,8 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	private  int bulletSpeed = 6;
 	private  int bulletDamage = 3;
 	
+	private final int BLACK_BUFF = 1;
+	
 	private boolean fire = false;
 	
 	public Client(String ip,String playerName,String tankName,int tankSpeed,int bulletSpeed,int bulletDamage){
@@ -176,6 +178,12 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 				//获取服务器中所有玩家的坦克数据
 				String recvBuf = in.readLine();
 				tanks = Oz.getTanks(recvBuf);
+				for(Tank t:tanks){
+					if( t.getId()==id ){
+						clientTank = t;
+						break;
+					}
+				}
 				
 		} catch (IOException e) {
 			System.exit(0);
@@ -189,16 +197,30 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	public void logic(){
 		
 		//坦克移动
-		clientTank.active(selectKey, tankSpeed,SCREEN_WIDTH,SCREEN_HEIGHT);
+		if( clientTank.getType()==Tank.BLACK_TANK ){
+			clientTank.active(selectKey, tankSpeed+BLACK_BUFF,SCREEN_WIDTH,SCREEN_HEIGHT);
+		}
+		else{
+			clientTank.active(selectKey, tankSpeed,SCREEN_WIDTH,SCREEN_HEIGHT);
+		}
+
 		//开火
 		if( fire==true ){
 			clientTank.fire();
 			fire = false;
 		}
 		//子弹移动
-		for(Bullet b:clientTank.getBullets()){
-			b.active(bulletSpeed);
+		if( clientTank.getType()==Tank.BLACK_TANK ){
+			for(Bullet b:clientTank.getBullets()){
+				b.active(bulletSpeed+BLACK_BUFF);
+			}
 		}
+		else{
+			for(Bullet b:clientTank.getBullets()){
+				b.active(bulletSpeed);
+			}
+		}
+		
 		//删除越界的子弹
 		for(int i=0; i<clientTank.getBullets().size(); i++){
 			if( !clientTank.getBullets().get(i).inRange(SCREEN_WIDTH, SCREEN_HEIGHT) ){
@@ -237,10 +259,12 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		if( tanks!=null ){
 			
 			for(Tank tank:tanks){
-				if( tank.getId()==id && tank.getType()!=Tank.OZ_TANK ){
+				
+				if( tank.getType()==Tank.BLACK_TANK ){
+					//在这里画黑色坦克的子弹***************************************
 					for(Bullet b:tank.getBullets()){
 						if( b.isAlive() ){
-							gBuffer.drawImage(MyBullet, b.getX(), b.getY(), null);
+							gBuffer.drawImage(OzBullet, b.getX(), b.getY(), null);
 						}
 					}
 				}
@@ -248,6 +272,13 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 					for(Bullet b:tank.getBullets()){
 						if( b.isAlive() ){
 							gBuffer.drawImage(OzBullet, b.getX(), b.getY(), null);
+						}
+					}
+				}
+				else if( tank.getId()==id ){
+					for(Bullet b:tank.getBullets()){
+						if( b.isAlive() ){
+							gBuffer.drawImage(MyBullet, b.getX(), b.getY(), null);
 						}
 					}
 				}
@@ -267,11 +298,13 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 						//奥兹专用坦克
 						drawTank(OzTank_Up, OzTank_Down, OzTank_Left, OzTank_Right, tank);
 					}
+					else if( tank.getType()==Tank.BLACK_TANK ){
+						//在这里画黑色的坦克****************************************
+						drawTank(OzTank_Up, OzTank_Down, OzTank_Left, OzTank_Right, tank);
+					}
 				    else if( tank.getId()==id ){
 						//根据方向来画对应的图片  玩家
 						drawTank(MyTank_Up, MyTank_Down, MyTank_Left, MyTank_Right, tank);
-						
-						
 					}
 					else{
 						//根据方向来画对应的图片 敌人

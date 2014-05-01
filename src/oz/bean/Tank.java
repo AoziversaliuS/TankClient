@@ -12,11 +12,11 @@ public class Tank implements Serializable{
 	public static final int HEIGHT = 40;
 	
 	public static final int FULL_HP = 40;
-	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2;
+	public static final int M_DEGFAULT=0,M_EXIT_REQUEST=1,M_EXIT_PERMIT=2,ROUND_SWITCHING=3;
 	
 	public static final int DEAD_1=3,DEAD_2=4;
 
-	public static final int GENERAL = 5,OZ_TANK=6;
+	public static final int GENERAL = 5,OZ_TANK=6,BLACK_TANK=7;
 	
 	
 	
