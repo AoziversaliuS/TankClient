@@ -65,8 +65,13 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 	Image OzTank_Right;
 	Image OzTank_Up;
 	Image OzTank_Down;
+	//BlackTank
+	Image BlackTank_Left;
+	Image BlackTank_Right;
+	Image BlackTank_Up;
+	Image BlackTank_Down;
 	//Bullet
-	Image OzBullet;
+	Image BlackBullet;
 	Image EnemyBullet;
 	Image MyBullet;
 	
@@ -161,8 +166,13 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		OzTank_Right = getImage("OzTank_Right.png");
 		OzTank_Up    = getImage("OzTank_Up.png"); 
 		OzTank_Down  = getImage("OzTank_Down.png");
+		//BlackTank
+		BlackTank_Left = getImage("BlackTank_Left.png");
+		BlackTank_Right = getImage("BlackTank_Right.png");
+		BlackTank_Up = getImage("BlackTank_Up.png");
+		BlackTank_Down = getImage("BlackTank_Down.png");
 		//Bullet
-		OzBullet  = getImage("OzBullet.png");
+		BlackBullet  = getImage("BlackBullet.png");
 		EnemyBullet  = getImage("EnemyBullet.png");
 		MyBullet  = getImage("MyBullet.png");
 		//BackGround
@@ -257,21 +267,23 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		
 		//画子弹
 		if( tanks!=null ){
-			
+			gBuffer.setFont(new Font("黑体", Font.BOLD, 30));
+			gBuffer.setColor(Color.WHITE);
+			gBuffer.drawString("Round "+tanks.get(0).getRoundNum(), 10, 75);
 			for(Tank tank:tanks){
 				
 				if( tank.getType()==Tank.BLACK_TANK ){
 					//在这里画黑色坦克的子弹***************************************
 					for(Bullet b:tank.getBullets()){
 						if( b.isAlive() ){
-							gBuffer.drawImage(OzBullet, b.getX(), b.getY(), null);
+							gBuffer.drawImage(BlackBullet, b.getX(), b.getY(), null);
 						}
 					}
 				}
 				else if( tank.getType()==Tank.OZ_TANK ){
 					for(Bullet b:tank.getBullets()){
 						if( b.isAlive() ){
-							gBuffer.drawImage(OzBullet, b.getX(), b.getY(), null);
+							gBuffer.drawImage(BlackBullet, b.getX(), b.getY(), null);
 						}
 					}
 				}
@@ -300,7 +312,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 					}
 					else if( tank.getType()==Tank.BLACK_TANK ){
 						//在这里画黑色的坦克****************************************
-						drawTank(OzTank_Up, OzTank_Down, OzTank_Left, OzTank_Right, tank);
+						drawTank(BlackTank_Up, BlackTank_Down, BlackTank_Left, BlackTank_Right, tank);
 					}
 				    else if( tank.getId()==id ){
 						//根据方向来画对应的图片  玩家
@@ -360,11 +372,11 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 		gBuffer.drawRect(tank.getX(),tank.getY()-dY, Tank.FULL_HP, 6);
 		gBuffer.setFont(new Font("黑体", Font.BOLD, 10));
 		gBuffer.drawString(tank.getName(), tank.getX(), tank.getY()-dY-dY2);
-		if( tank.getId()==id && tank.getType()!=Tank.OZ_TANK ){
+		if( tank.getId()==id && tank.getType()==Tank.GENERAL ){
 			gBuffer.setColor(new Color(0,162,232));
 		}
-		else if( tank.getType()==Tank.OZ_TANK ){
-			gBuffer.setColor(new Color(34,177,36));
+		else if( tank.getType()!=Tank.GENERAL ){
+			gBuffer.setColor(Color.BLACK);
 		}
 		else{
 			gBuffer.setColor(new Color(237,28,36));
@@ -493,7 +505,7 @@ public class Client extends JFrame implements Runnable,KeyListener,WindowListene
 			gBuffer.drawImage(OzTank_Up, 2000, 2000, null);
 			
 			gBuffer.drawImage(EnemyBullet, 2000, 2000, null);
-			gBuffer.drawImage(OzBullet, 2000, 2000, null);
+			gBuffer.drawImage(BlackBullet, 2000, 2000, null);
 			gBuffer.drawImage(MyBullet, 2000, 2000, null);
 			
 			firstTime = false;

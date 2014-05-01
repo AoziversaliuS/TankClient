@@ -40,7 +40,7 @@ public class Tank implements Serializable{
 	private int clientMessage = Tank.M_DEGFAULT;
 	
 	private int serverMsg=S_PLAYING;
-	private int roundNum;
+	private int roundNum=1;
 	private int roundCount;
 	
 	private ArrayList<Bullet> bullets = new ArrayList<Bullet>();
